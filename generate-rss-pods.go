@@ -32,7 +32,6 @@ import (
 	"os"
 	"strings"
 	"text/template"
-	"time"
 )
 
 const (
@@ -53,23 +52,23 @@ type Podcast struct {
 	PodEpisodes                       []Episode
 }
 
+func getDomainName() string {
+	if domain, exist := os.LookupEnv("DOMAIN_NAME"); exist {
+		return domain
+	}
+	return DOMAIN_NAME
+}
+
 func main() {
-	DOMAIN_NAME := func() string {
-		if domain, exist := os.LookupEnv("DOMAIN_NAME"); exist {
-			return domain
-		}
-		return DOMAIN_NAME
-	}()
+	DOMAIN_NAME := getDomainName()
 
-	currentTime := time.Now().Format(DATE_FORMAT)
-
-	var podcast = Podcast{
+	podcast := Podcast{
 		PodLink:        DOMAIN_NAME + "feed.xml",
 		PodTitle:       "My Daily Readings",
 		PodDescription: "Podcasts for daily",
 	}
 	// Prepare some data to insert into the template.
-	var episodes = []Episode{}
+	episodes := []Episode{}
 
 	fs.WalkDir(os.DirFS("."), ".", func(path string, de fs.DirEntry, err error) error {
 		if err != nil {
@@ -78,8 +77,8 @@ func main() {
 		if strings.Contains(path, "mp3") {
 			fileUrl := DOMAIN_NAME + html.EscapeString(url.PathEscape(path))
 			title := html.EscapeString(strings.ReplaceAll(de.Name(), ".mp3", ""))
-			pubDate := currentTime
 			fileInfo, _ := de.Info()
+			pubDate := fileInfo.ModTime().Local().Format(DATE_FORMAT)
 			fileSize := fileInfo.Size()
 			episodeDuration := float64(fileSize) * BIT_TO_BYTE_FACTOR / TTS_FILE_BIT_RATE
 
@@ -103,7 +102,6 @@ func main() {
 	}
 
 	f, err := os.Create("./feed.xml")
-
 	if err != nil {
 		log.Panic(err)
 	}
