@@ -56,6 +56,7 @@ func getDomainName() string {
 	if domain, exist := os.LookupEnv("DOMAIN_NAME"); exist {
 		return domain
 	}
+
 	return DOMAIN_NAME
 }
 
@@ -78,7 +79,7 @@ func main() {
 			fileUrl := DOMAIN_NAME + html.EscapeString(url.PathEscape(path))
 			title := html.EscapeString(strings.ReplaceAll(de.Name(), ".mp3", ""))
 			fileInfo, _ := de.Info()
-			pubDate := fileInfo.ModTime().Local().Format(DATE_FORMAT)
+			pubDate := fileInfo.ModTime().UTC().Format(DATE_FORMAT)
 			fileSize := fileInfo.Size()
 			episodeDuration := float64(fileSize) * BIT_TO_BYTE_FACTOR / TTS_FILE_BIT_RATE
 

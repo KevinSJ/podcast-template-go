@@ -25,10 +25,10 @@ lint:
 ci: lint test
 
 build:
-	go build -ldflags "-s -w" -o pod ./generate-rss-pods.go
+	go build -ldflags "-s -w" -o pod ./main.go
 
 build-aarm64:
-	env GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o pod ./generate-rss-pods.go
+	env GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o pod ./main.go
 
 .DEFAULT_GOAL := build
 
