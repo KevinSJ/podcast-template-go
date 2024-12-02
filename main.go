@@ -25,6 +25,7 @@
 package main
 
 import (
+	"flag"
 	"html"
 	"io/fs"
 	"log"
@@ -37,7 +38,10 @@ import (
 const (
 	TTS_FILE_BIT_RATE  float64 = 32000.0
 	DOMAIN_NAME        string  = "https://lab.jiangsc.me/"
-	DATE_FORMAT        string  = "Mon Jan 2 15:04:05 MST 2006"
+	FEED_PATH          string  = "feed.xml"
+	POD_TITLE          string  = "My Daily Readings"
+	POD_DESC           string  = "Podcast for daily reading"
+	DATE_FORMAT        string  = "Mon, 02 Jan 2006 15:04:05 -0700"
 	BIT_TO_BYTE_FACTOR float64 = 8.0
 )
 
@@ -61,12 +65,16 @@ func getDomainName() string {
 }
 
 func main() {
-	DOMAIN_NAME := getDomainName()
+	domainName := flag.String("d", getDomainName(), "usage")
+	feedPath := flag.String("f", FEED_PATH, "usage")
+	podTitle := flag.String("title", POD_TITLE, "usage")
+	podDescription := flag.String("desc", POD_DESC, "usage")
+	flag.Parse()
 
 	podcast := Podcast{
-		PodLink:        DOMAIN_NAME + "feed.xml",
-		PodTitle:       "My Daily Readings",
-		PodDescription: "Podcasts for daily",
+		PodLink:        *domainName + *feedPath,
+		PodTitle:       *podTitle,
+		PodDescription: *podDescription,
 	}
 	// Prepare some data to insert into the template.
 	episodes := []Episode{}
@@ -76,8 +84,15 @@ func main() {
 			log.Fatal(err)
 		}
 		if strings.Contains(path, "mp3") {
-			fileUrl := DOMAIN_NAME + html.EscapeString(url.PathEscape(path))
-			title := html.EscapeString(strings.ReplaceAll(de.Name(), ".mp3", ""))
+			fileUrl := *domainName + html.EscapeString(url.PathEscape(path))
+			embeddedTitle, artist, _ := ReadID3Tags(path)
+			title := ""
+			if embeddedTitle != "" {
+				title = "[" + artist + "]" + embeddedTitle
+			} else {
+				title = html.EscapeString(strings.ReplaceAll(de.Name(), ".mp3", ""))
+			}
+
 			fileInfo, _ := de.Info()
 			pubDate := fileInfo.ModTime().UTC().Format(DATE_FORMAT)
 			fileSize := fileInfo.Size()
@@ -102,7 +117,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	f, err := os.Create("./feed.xml")
+	f, err := os.Create("./" + *feedPath)
 	if err != nil {
 		log.Panic(err)
 	}
