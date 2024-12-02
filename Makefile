@@ -28,7 +28,7 @@ build:
 	go build -ldflags "-s -w" -o pod .
 
 build-aarm64:
-	env GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o pod ./main.go
+	env GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o pod .
 
 .DEFAULT_GOAL := build
 
