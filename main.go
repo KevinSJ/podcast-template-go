@@ -90,7 +90,7 @@ func main() {
 			if embeddedTitle != "" {
 				title = "[" + artist + "]" + embeddedTitle
 			} else {
-				title = html.EscapeString(strings.ReplaceAll(de.Name(), ".mp3", ""))
+				title = strings.ReplaceAll(de.Name(), ".mp3", "")
 			}
 
 			fileInfo, _ := de.Info()
@@ -100,8 +100,8 @@ func main() {
 
 			episodes = append(episodes, Episode{
 				Url:         fileUrl,
-				Title:       title,
-				Description: title,
+				Title:       html.EscapeString(title),
+				Description: html.EscapeString(title),
 				PubDate:     pubDate,
 				FileSize:    fileSize,
 				Duration:    episodeDuration,
