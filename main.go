@@ -85,11 +85,12 @@ func main() {
 		}
 		if strings.Contains(path, "mp3") {
 			fileUrl := *domainName + html.EscapeString(url.PathEscape(path))
-			embeddedTitle, artist, _ := ReadID3Tags(path)
 			title := ""
-			if embeddedTitle != "" {
-				title = "[" + artist + "]" + embeddedTitle
-			} else {
+			if metafileContent, err := os.ReadFile(strings.ReplaceAll(path, "mp3", "")); err != nil {
+				title = string(metafileContent)
+			}
+
+			if title != "" {
 				title = strings.ReplaceAll(de.Name(), ".mp3", "")
 			}
 
